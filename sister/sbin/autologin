@@ -1,0 +1,25 @@
+#!/bin/bash
+# autologin (lab-hook) by nieltg, Daniel
+
+APP_PATH="/usr/local/lib/lab_sister/login"
+
+# Execute application.
+
+if [ -x "${APP_PATH}" ]
+then
+    exec "${APP_PATH}"
+
+    echo "$0: exec() is failed." 1>&2
+else
+    echo "Lab. is not installed on this system." 1>&2
+fi
+
+login -f tc
+
+# Reboot if app. cannot be executed.
+
+echo 1>&2
+echo -n "Please any key to reboot... " 1>&2
+read -s junk
+
+/sbin/reboot

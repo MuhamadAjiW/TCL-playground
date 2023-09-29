@@ -1,0 +1,40 @@
+#!/bin/bash
+# login by nieltg, Daniel
+
+source "/usr/local/lib/lab_sister/config.sh"
+
+if [ $(id -u) -ne 0 ]
+then
+    echo "This program can only be run as root." 1>&2
+    exit 1
+fi
+
+clear
+
+# Initialize lab. or login.
+
+if [ -r "${LAB_VAR_USERNAME}" ]
+then
+    # Use this instead in case you want to use it as root
+    exec login -f tc
+
+    # exec login -f "$(cat "${LAB_VAR_USERNAME}")"
+
+    echo "$0: Unable to exec() login shell" 1>&2
+else
+    # Initialize.
+    if "${LAB_LIB_INIT}"
+    then
+        exit 0
+    fi
+
+    echo "$0: Unable to initialize" 1>&2
+fi
+
+# Reboot if lab. cannot be initialized.
+
+echo 1>&2
+echo -n "Press any key to reboot... " 1>&2
+
+read -s junk
+/sbin/reboot

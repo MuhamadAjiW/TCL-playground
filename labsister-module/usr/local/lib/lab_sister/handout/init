@@ -1,0 +1,26 @@
+#!/bin/bash
+# handout/init by nieltg, Daniel
+
+source "/usr/local/lib/lab_sister/config.sh"
+
+if [ $(id -u) -eq 0 ]
+then
+    echo "This program must not run as root." 1>&2
+    exit 1
+fi
+
+# Prepare user home directory.
+
+user_home="$(pwd)"
+
+if ! ( cd "${LAB_LIB_HANDOUT_SKEL}"; find * -exec sh -c "if [ -d \"{}\" ]; then mkdir \"{}\"; else cp \"{}\" ${user_home}/\"{}\"; fi" ';' )
+then
+    echo "$0: Unable to copy skeleton files" 1>&2
+    exit 1
+fi
+
+if ! cat "${LAB_LIB_HANDOUT_PROFILE_APPEND_SRC}" >> "${user_home}/.profile"
+then
+    echo "$0: Unable to append .profile" 1>&2
+    exit 1
+fi

@@ -1,0 +1,7 @@
+datalab-handout
+*.iso
+*.zip
+*.gz
+modules/
+labsister-module/usr/local/lib/lab_sister/grader/
+labsister-module/usr/local/lib/lab_sister/handout/skel/

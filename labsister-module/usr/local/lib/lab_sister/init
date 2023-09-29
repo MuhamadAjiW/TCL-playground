@@ -1,0 +1,139 @@
+#!/bin/bash
+# init by nieltg, Daniel
+
+source "/usr/local/lib/lab_sister/config.sh"
+
+if [ $(id -u) -ne 0 ]
+then
+    echo "This program can only be run as root." 1>&2
+    exit 1
+fi
+
+# Initialize lab. internal.
+
+if ! mkdir -p "${LAB_VAR}"
+then
+    echo "$0: Unable to create lab. state directory" 1>&2
+    exit 1
+fi
+
+# set bash as shell globally
+which bash | sudo tee -a /etc/shells > /dev/null
+sudo sed -i '/^tc:/s#:[^:]\+$#:/bin/bash#' /etc/passwd
+
+#<GDB>
+#   Initialize GDB globally
+sudo mv /usr/local/lib/lab_sister/gdb/gdb /usr/local/bin
+sudo mkdir /usr/local/share/gdb
+sudo mv /usr/local/lib/lab_sister/gdb/data-directory/* /usr/local/share/gdb
+sudo rm -r /usr/local/lib/lab_sister/gdb/data-directory
+echo "source /usr/local/lib/lab_sister/gdb/peda/peda.py" >> /home/tc/.gdbinit
+echo "set disassembly-flavor att" >> /home/tc/.gdbinit
+echo "set height 48" >> /home/tc/.gdbinit
+echo "set pagination on" >> /home/tc/.gdbinit
+#</GDB>
+
+# Begin user interaction.
+
+clear
+
+cat 1>&2 << 'EOF'
+Konnichiwa, Minnya-san!                                      
+                       @&@@@/                     
+                      @*@%&@@@@@@#,@.@@@,@        
+                     @ @@@@@@@@@@@@&@,@#&@        
+                    @.@@@@@@@@@@@@@@@&&.(&@                     Praktikum IF2130 Organisasi dan Arsitektur Komputer
+                   *%@@@@@@%@*@@@@@%@@*&@@,                               II2130 Arsitektur dan Sistem Komputer
+                   @@@@@@ ((#&&%(#@.@@%%#@        
+                  @*@%@@@&&%@@@@@@#@(/*@.@.       
+                @#@#.@%,(*@@@##*@@@@@@%@    @*.@@#              Dipersiapkan oleh                             Asisten
+                   @@@.@.#(##@@,(((*@#@,@  @ @@.@@              .s5SSSs.                                            
+                      @&@@##@#&.,%(@@   @*#&*@(@@                     SS. s.  .s5SSSs.  .s5SSSSs. .s5SSSs.  .s5SSSs.
+                    @.&@%##@@@&&(/@@,@  @@@*@((/@               sS    `:; SS.       SS.    SSS          SS.       SS.
+     @@(,%%.@@%     @@@@/@@#@@@@%#@@(#&@@@@@@*@.                SS        S%S sS    `:;    S%S    sS    `:; sS    S%S
+  *@@@@@. ,@@@@ @  #(@@@@@@@#@@@(#//,@@@@& @&                   `:;;;;.   S%S `:;;;;.      S%S    SSSs.     SS .sS;:'
+ @.@@@#     @(@@@#  @@%%@@@@&&@/@(,%//%%@@                            ;;. S%S       ;;.    S%S    SS        SS    ;,  
+ @@@&,        **   @@@@#@  @&%%&&&&&%(**//*(((/                       `:; `:;       `:;    `:;    SS        SS    `:;
+ @@@&*            @%@@@@ @#@,&&&&&&&&,(**(**.@@                 .,;   ;,. ;,. .,;   ;,.    ;,.    SS    ;,. SS    ;,.
+ @.@@@           *%@@@/@@/@@@,@&&&&&&&&&&&&,@.,@                `:;;;;;:' ;:' `:;;;;;:'    ;:'    `:;;;;;:' `:    ;:'
+  @#@@,@        @.&/@.*@#@@@@@@,/*&&&&&&&&&&@     
+    @,@@@,@@*  @.@@/@@@@(@@@@@@@@(,,&&&@&.@.      
+       @@/@@,*@@@#,(*.@ @@&@@@*@&##/@##@,@        
+             @.@*/*(((/@ @%(&@@#@,@%%%%@          
+               .@@@,.@@@&*,&&&(%@&%*****@         
+                       @& (#(@&@&@@((***@         
+                      @&.@##@@(@%@@(#@//          
+                       @@@@@(.@@@@#(.@            
+                      @%@@@%#@@@@(.@              
+                     @@@@@@@@@&(%@                
+                   @@@@@@@@@@#%@                  
+                ,@/@@/#@@@@@@,@                   
+             %@@@@@@@@#@@@@@@@@                   
+             @.@@@@@@((,@@@@@#(@                  
+              @#@@@@(((@@@@@@@@(@                 
+               @(@@@&(((@@@@@@@&(/@@@@&           
+               @,@@@@@#@@@@@@@@@@@%@@@@/@         
+                @@@@@@/(@@@@@@@%@/(@(((*@         
+                        .@@@(/&@%@@@@@%           
+EOF
+
+while true
+do
+    echo 1>&2
+    read -p "Masukkan NIM Anda: " nim
+
+    # Check for NIM.
+
+    zapped_nim=$(echo "${nim}" | grep -E "^[0-9]{8}$")
+
+    [ "$?" -eq 0 ] && break
+
+    echo "Input tidak valid." 1>&2
+done
+
+# Prepare home directory.
+
+user="nim_${zapped_nim}"
+user_home="/home/${user}"
+
+echo 1>&2
+echo "Preparing... " 1>&2
+
+if ! adduser -D "${user}"
+then
+    echo "$0: Unable to create user" 1>&2
+    exit 1
+fi
+
+if ! su -l -s "${LAB_LIB_HANDOUT_INIT}" "${user}"
+then
+    echo "$0: Unable to initialize user home directory" 1>&2
+    exit 1
+fi
+
+# set bash as shell for user
+sudo sed -i "/^${user}:/s#:[^:]\\+\$#:/bin/bash#" /etc/passwd
+
+#<GDB>
+#   Add gdb-peda for user
+echo "source /usr/local/lib/lab_sister/gdb/peda/peda.py" >> /home/${user}/.gdbinit
+echo "set disassembly-flavor att" >> /home/${user}/.gdbinit
+echo "set height 48" >> /home/${user}/.gdbinit
+echo "set pagination on" >> /home/${user}/.gdbinit
+#</GDB>
+
+# download binary file for password
+# curl "${LAB_PASSWORD_ENDPOINT}/password_${zapped_nim}" --output "/home/${user}/password"
+# curl https://sister21.tech/api/static/bin/password_13522001 --output /home/tc/password
+# chmod +x "/home/${user}/password"
+# end
+
+# Store current configuration.
+
+if ! echo "${user}" > "${LAB_VAR_USERNAME}"
+then
+    echo "$0: Unable to write lab. state" 1>&2
+    exit 1
+fi
+
+echo "done." 1>&2
