@@ -19,9 +19,7 @@ then
     # exec login -f tc
 
     username="$(cat "${LAB_VAR_USERNAME}")"
-
-    exec login -f "$(username)"
-    # chroot "/home/$(cat "${LAB_VAR_USERNAME}")" /bin/bash
+    exec login -f "${username}"
 
     echo "$0: Unable to exec() login shell" 1>&2
 else
