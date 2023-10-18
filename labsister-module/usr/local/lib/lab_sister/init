@@ -105,6 +105,8 @@ then
     exit 1
 fi
 
+
+
 if ! su -l -s "${LAB_LIB_HANDOUT_INIT}" "${user}"
 then
     echo "$0: Unable to initialize user home directory" 1>&2
@@ -135,5 +137,8 @@ then
     echo "$0: Unable to write lab. state" 1>&2
     exit 1
 fi
+
+
+chmod 700 "${user_home}"
 
 echo "done." 1>&2

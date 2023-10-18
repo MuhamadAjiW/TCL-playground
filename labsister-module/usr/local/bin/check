@@ -1,8 +1,0 @@
-#!/bin/bash
-# lab-check by nieltg, Daniel
-
-source "/usr/local/lib/lab_sister/config.sh"
-
-export GRADER_PATH="${LAB_LIB_GRADER}"
-
-perl "${LAB_LIB_GRADER}/driver.pl" 2>&1

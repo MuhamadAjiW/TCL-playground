@@ -13,11 +13,13 @@ fi
 
 user_home="$(pwd)"
 
-if ! ( cd "${LAB_LIB_HANDOUT_SKEL}"; find * -exec sh -c "if [ -d \"{}\" ]; then mkdir \"{}\"; else cp \"{}\" ${user_home}/\"{}\"; fi" ';' )
-then
-    echo "$0: Unable to copy skeleton files" 1>&2
-    exit 1
-fi
+# CONFNOTE: This is for adding handout files into the operating system, change for corresponding lab activities
+
+# if ! ( cd "${LAB_LIB_HANDOUT_SKEL}"; find * -exec sh -c "if [ -d \"{}\" ]; then mkdir \"{}\"; else cp \"{}\" ${user_home}/\"{}\"; fi" ';' )
+# then
+#     echo "$0: Unable to copy skeleton files" 1>&2
+#     exit 1
+# fi
 
 if ! cat "${LAB_LIB_HANDOUT_PROFILE_APPEND_SRC}" >> "${user_home}/.profile"
 then

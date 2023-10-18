@@ -15,10 +15,13 @@ clear
 
 if [ -r "${LAB_VAR_USERNAME}" ]
 then
-    # Use this instead in case you want to use it as root
-    exec login -f tc
+    # CONFNOTE: Use this instead in case you want to use it as root
+    # exec login -f tc
 
-    # exec login -f "$(cat "${LAB_VAR_USERNAME}")"
+    username="$(cat "${LAB_VAR_USERNAME}")"
+
+    exec login -f "$(username)"
+    # chroot "/home/$(cat "${LAB_VAR_USERNAME}")" /bin/bash
 
     echo "$0: Unable to exec() login shell" 1>&2
 else
